@@ -1,0 +1,12 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET     /                           controllers.Application.index()
+GET		/api/category/list	controllers.WebApi.getCategoryList(id: Int ?= 0, top: Int ?=10)
+GET		/api/category/name	controllers.WebApi.getCategoryName(id: Int ?= 0)
+POST	/api/category/name	controllers.WebApi.getCategoryNames()
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.at(path="/public", file)
