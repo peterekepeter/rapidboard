@@ -7,6 +7,7 @@ GET     /                           controllers.Application.index()
 GET		/api/category/list	controllers.WebApi.getCategoryList(id: Int ?= 0, top: Int ?=10)
 GET		/api/category/name	controllers.WebApi.getCategoryName(id: Int ?= 0)
 POST	/api/category/name	controllers.WebApi.getCategoryNames()
+POST	/api/category/create	controllers.WebApi.createCategory()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

@@ -35,7 +35,7 @@ var Rapidboard = (function(){
 		//request for new names
 		if (request.length > 0)
 		{
-			sendJson('/api/category/name',{list:idlist},function(data){
+			sendJson('/api/category/name',{list:request},function(data){
 				var list = data.list;
 				for (var i=0; i<list.length; i++)
 				{
@@ -64,7 +64,7 @@ var Rapidboard = (function(){
 	}
 	
 	var db = {
-		catName : []
+		catName : {}
 	}
 	
 	var strcmp = function(a,b)
@@ -119,6 +119,19 @@ var Rapidboard = (function(){
 					callback(result);
 				});
 			});
+		},
+		
+		CategoryNames: function(namelist, callback)
+		{
+			getCatNames(namelist,callback); 
+		},
+		
+		CategoryCreate: function(name, parent, callback)
+		{
+			sendJson('/api/category/create',{name:name, parent:parent},function(data){
+				db.catName[data.id] = name;	
+				callback(data);
+			})
 		}
 	}
 	

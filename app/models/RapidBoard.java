@@ -54,7 +54,8 @@ public class RapidBoard implements RapidBoardAPI
 	
 	public int createCategory(String Name) 
 	{
-		return createCategory(Name,0);
+		int id = createCategory(Name,0);
+		return id;
 	}
 	
 	public boolean deleteCategory(int categoryID) { 

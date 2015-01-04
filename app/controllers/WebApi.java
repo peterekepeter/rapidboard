@@ -49,9 +49,19 @@ public class WebApi extends Controller {
 			resultList.add(api.getCategoryName(element.asInt()));
 		}
 		
-		System.out.println("request = " + json);
-		System.out.println("response = " + resultJson);
+		//System.out.println("request = " + json);
+		//System.out.println("response = " + resultJson);
 		
+		return ok(resultJson);
+	}
+	
+	public static Result createCategory()
+	{
+		JsonNode json = request().body().asJson();
+		JsonNode name = json.get("name");
+		JsonNode parent = json.get("parent");
+		ObjectNode resultJson = Json.newObject();
+		resultJson.put("id", api.createCategory(name.asText(), parent.asInt()));
 		return ok(resultJson);
 	}
 
