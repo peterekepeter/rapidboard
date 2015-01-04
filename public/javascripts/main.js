@@ -1,7 +1,8 @@
-
+	
 var rb = Rapidboard();
 var nav = [0];
 
+var wb;
 
 $(document).ready(function(){
 	init();
@@ -18,6 +19,7 @@ function init()
 	// headline with breadcrumbs
 	var bread = document.createElement('div');
 	bread.setAttribute('class','head');
+	wb = BreadCrumbWidget(bread);
 	main.appendChild(bread);	
 	
 	// category widget
@@ -32,7 +34,7 @@ function init()
 	main.appendChild(content);
 	
 	catmain(cat);
-	breadmain(bread);
+	wb.Refresh(bread);
 	
 	// make it visible
 	document.body.appendChild(main);
@@ -43,7 +45,7 @@ function generateCategoryListItem(data)
 	var e = document.createElement('li');
 	e.setAttribute('class','categoryListItem');
 	e.setAttribute('content',data.id);
-	e.onclick = function(){ nav.push(data.id); catamount=10; breadmain(); catmain(); };
+	e.onclick = function(){ nav.push(data.id); catamount=10; wb.Refresh(); catmain(); };
 	e.textContent = data.name;
 	return e;
 }
@@ -73,7 +75,7 @@ function generateCategoryList(data)
 	{
 		var er = generateDefaultListItem('back');
 		er.setAttribute('class', 'categoryListItem categoryListFunction');
-		er.onclick = function(){ nav.pop(); breadmain(); catmain(); };
+		er.onclick = function(){ nav.pop(); wb.Refresh(); catmain(); };
 		list.appendChild(er);
 	}
 	
@@ -89,7 +91,7 @@ function generateCategoryList(data)
 			var name = form.firstChild.value;
 			if (name.length>0)
 				rb.CategoryCreate(name, nav[nav.length-1], 
-					function(data){nav.push(data.id); catmain(); breadmain();});
+					function(data){nav.push(data.id); catmain(); wb.Refresh();});
 			else 
 				catmain();
 			return false;
@@ -129,24 +131,6 @@ function catmain(element)
 	})
 }
 
-function generateBreadItem(name, target)
-{
-	var li = document.createElement('span');
-	li.textContent = name;
-	li.setAttribute('content',target);
-	li.setAttribute('class','breadItem');
-	li.onclick = function(){ 
-		var val = Number(this.getAttribute('content'));
-		var i = nav.length - 1;
-		while (i>0 && nav[i] != val) {
-			nav.pop();
-			i--;
-		}
-		breadmain();
-		catmain();
-	};
-	return li;
-}
 
 function removeChildren(element)
 {
@@ -154,27 +138,3 @@ function removeChildren(element)
 		element.removeChild(element.firstChild);
 }
 
-var breadelem;
-
-function breadmain(element)
-{
-	if (element != null) breadelem = element; else element = breadelem;
-	rb.CategoryNames(nav, function(data){
-		var ul = document.createElement('div');
-		ul.setAttribute('class','bread');
-		
-		heading = document.createElement('h1');
-		heading.appendChild(generateBreadItem('rapidboard',nav[0]));
-		ul.appendChild(heading);
-		for (var i=1; i<data.length; i++)
-		{
-			var sep = document.createElement('span');
-			sep.textContent = ' / ';
-			sep.setAttribute('class', 'breadSep');
-			ul.appendChild(sep);
-			ul.appendChild(generateBreadItem(data[i],nav[i]));
-		}
-		removeChildren(element);
-		element.appendChild(ul);
-	});
-}
