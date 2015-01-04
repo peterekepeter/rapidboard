@@ -58,14 +58,17 @@ public interface RapidBoardAPI{
 	 * Creates a new thread and returns its ID.
 	 * The first parameter is the ID of the category inside which we want to
 	 * have this discussion thread.
+	 * 0 is returned if creation failed.
 	 */
 	int createThread(int categoryID, String name);
+	
+	int[] getThreadList(int categoryID, int start, int end);
 	
 	int deleteThread(int threadID);
 	
 	/*
 	 * Returns the name of a single thread. This does not change and can be
-	 * cached.
+	 * cached. Null is returned if the thread doesn't exist.
 	 */
 	String getThreadName(int threadID); //cache
 	/*
@@ -98,18 +101,18 @@ public interface RapidBoardAPI{
 	 * to true, then this method is used in long polling mode and will only
 	 * return once the number if messages in the thread changes.
 	 */
-	int getThreadMessageCount(boolean latent);
-	int getThreadMessageCount(); /* latent = false; */
+	int getThreadMessageCount(int threadID, boolean latent);
+	int getThreadMessageCount(int threadID); /* latent = false; */
 	
 	/*
-	 * Allocates a local authorID.
+	 * Allocates a local authorID for a thread.
 	 */
-	int allocateAuthor();
+	int allocateAuthor(int threadID);
 
 	/*
 	 * Creates a new message inside a thread.
 	 */ 
-	int createMessage(int threadID, String body);
+	int createMessage(int threadID,int author, String body);
 	
 	int getMessageAuthor(int messageID); //cacheable
 	String getMessageBody(int messageID); //cacheable

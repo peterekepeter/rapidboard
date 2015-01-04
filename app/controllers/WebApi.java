@@ -64,5 +64,17 @@ public class WebApi extends Controller {
 		resultJson.put("id", api.createCategory(name.asText(), parent.asInt()));
 		return ok(resultJson);
 	}
+	
+	public static Result getThreadList(int id, int start, int end)
+	{
+		int[] list = api.getThreadList(id, start, end);
+		ObjectNode result = Json.newObject();
+		ArrayNode array = result.putArray("list");
+		for (int item : list)
+		{
+			array.add(item);
+		}
+		return ok(result);
+	}
 
 }

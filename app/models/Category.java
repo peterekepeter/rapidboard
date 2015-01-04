@@ -53,4 +53,21 @@ class Category
 	{
 		return this.name;
 	}
+	public void addThread(Thread t)
+	{
+		threads.add(t);
+	}
+	public void removeThread(Thread t)
+	{
+		threads.remove(t);
+	}
+	public int getThreadCount()
+	{
+		return threads.size();
+	}
+	public Thread getThread(int index)
+	{
+		return threads.get(index);
+	}
+	
 }

@@ -26,14 +26,25 @@ public class RapidBoard implements RapidBoardAPI
 		messageList = new ArrayList<Message>();
 		messageList.add(null); 
 		
-		/* dummy data */
+		/* dummy data for testing */
 		int news = createCategory("news",0);
 		createCategory("cars",0);
-		createCategory("computers",0);
+		int computers = createCategory("computers",0);
 		createCategory("political", news);
 		createCategory("local", news);
 		createCategory("global", news);
 		createCategory("it", news);
+		int th1 = createThread(computers, "Apple vs PC");
+		int t1a1 = allocateAuthor(th1);
+		int t1a2 = allocateAuthor(th1);
+		createMessage(th1,t1a1,"I think Apple is better.");
+		createMessage(th1,t1a2,"Apple is an overprices piece of s***");
+		int th2 = createThread(computers, "Photoshop thread");
+		int t2a1 = allocateAuthor(th2);
+		createMessage(th2,t2a1,"Post tips and tricks in photoshop");
+		createMessage(th2,t2a1,"Post tips and tricks in photoshop");
+		createMessage(th2,t2a1,"Double post... sorry...");
+		
 	}
 
 	public int createCategory(String Name, int parentID) 
@@ -111,25 +122,179 @@ public class RapidBoard implements RapidBoardAPI
 		return result;
 	}
 	
-	public int createThread(int categoryID, String name) { /* TODO */return 0;}
-	public int deleteThread(int threadID) { /* TODO */return 0;}
-	public String getThreadName(int threadID) { /* TODO */return null;}
-	public String[] getThreadName(int threadID[]) { /* TODO */return null;}
-	public String getThreadFirstMessageBody(int threadID) { /* TODO */return null;}
-	public String[] getThreadFirstMessage(int threadID[]) { /* TODO */return null;}
-	public int[] getThreadMessageList(int threadID, int start, int end) { /* TODO */return null;}
-	public int[] getThreadMessageList(int threadID) { /* TODO */return null;}
-	public int getThreadMessageCount(boolean latent) { /* TODO */return 0;}
-	public int getThreadMessageCount() { /* TODO */return 0;}
-	public int allocateAuthor() { /* TODO */return 0;}
-	public int createMessage(int threadID, String body) { /* TODO */return 0;}
-	public int getMessageAuthor(int messageID) { /* TODO */return 0;}
-	public String getMessageBody(int messageID) { /* TODO */return null;}
-	public int[] getMessageAuthor(int messageID[]) { /* TODO */return null;}
+	public int createThread(int categoryID, String name) { 
+		int id = threadList.size();
+		if (categoryID >= id) return 0;
+		Category cat = categoryList.get(categoryID);
+		if (cat == null) return 0;
+		//ok
+		Thread t = new Thread(id,name,cat);
+		cat.addThread(t);
+		threadList.add(t);
+		return id;
+	}
+	
+	public int[] getThreadList(int categoryID, int start, int end)
+	{
+		if (start<end && categoryID >= categoryList.size()) return null;
+		Category cat = categoryList.get(categoryID);
+		//ok i guess
+		int threadCount = cat.getThreadCount();
+		if (start<0) start = 0;
+		if (end>threadCount) end = threadCount;
+		int count = end-start;
+		if (count<=0) return null;
+		int[] result = new int[count];
+		for (int i=0; i<count; i++)
+		{
+			result[i] = cat.getThread(start+i).getId();
+		}
+		return result;
+	}
+	
+	public int deleteThread(int threadID) { 
+		if (threadID >= threadList.size()) return 0;
+		Thread t = threadList.get(threadID);
+		if (t == null) return 0;
+		//ok
+		t.getCategory().removeThread(t);
+		threadList.set(threadID,null);
+		return threadID;
+	}
+	
+	public String getThreadName(int threadID) { 
+		if (threadID >= threadList.size()) return null;
+		Thread t = threadList.get(threadID);
+		if (t == null) return null;
+		return t.getName();
+	}
+	
+	public String[] getThreadName(int threadID[]) { 
+		String[] result = new String[threadID.length];
+		for (int i=0; i<threadID.length; i++)
+		{
+			result[i] = getThreadName(threadID[i]);
+		}
+		return result;
+	}
+	
+	public String getThreadFirstMessageBody(int threadID) { 
+		if (threadID >= threadList.size()) return null;
+		Thread t = threadList.get(threadID);
+		if (t == null) return null;
+		Message first = t.getMessage(0);
+		if (first == null) return null;
+		return first.getBody();
+	}
+	
+	public String[] getThreadFirstMessage(int threadID[]) { 
+		String[] result = new String[threadID.length];
+		for (int i=0; i<threadID.length; i++)
+		{
+			result[i] = getThreadFirstMessageBody(threadID[i]);
+		}
+		return result;
+	}
+	
+	public int[] getThreadMessageList(int threadID, int start, int end) {
+		if (threadID >= threadList.size()) return null;
+		Thread t = threadList.get(threadID);
+		if (t == null) return null;
+		//ok
+		int count = end-start;
+		int[] result = new int[count];
+		for (int i=0; i<count; i++)
+		{
+			Message msg = t.getMessage(start + i);
+			int val = 0;
+			if (msg != null)
+				val = msg.getId();
+			result[i] = val; 
+		}
+		return result;
+	}
+	
+	public int[] getThreadMessageList(int threadID) { 
+		if (threadID >= threadList.size()) return null;
+		Thread t = threadList.get(threadID);
+		if (t == null) return null;
+		//ok
+		int count = t.getMessageCount();
+		int[] result = new int[count];
+		for (int i=0; i<count; i++)
+		{
+			Message msg = t.getMessage(i);
+			int val = 0;
+			if (msg != null)
+				val = msg.getId();
+			result[i] = val; 
+		}
+		return result;
+	}
+	
+	public int getThreadMessageCount(int threadID, boolean latent) {
+		//TODO latent
+		if (threadID >= threadList.size()) return 0;
+		Thread t = threadList.get(threadID);
+		if (t == null) return 0;
+		//ok 
+		return t.getMessageCount();
+	}
+	
+	public int getThreadMessageCount(int threadID) { 
+		return getThreadMessageCount(threadID, false);
+	}
+	
+	public int allocateAuthor(int threadID) { 
+		if (threadID >= threadList.size()) return 0;
+		Thread t = threadList.get(threadID);
+		if (t == null) return 0;
+		//ok 
+		return t.allocateAuthor();
+	}
+	
+	public int createMessage(int threadID, int author, String body) { 
+		int id = messageList.size();
+		if (threadID >= threadList.size()) return 0;
+		Thread t = threadList.get(threadID);
+		if (t == null) return 0;
+		//ok
+		Message m = new Message(id,author,body);
+		t.addMessage(m);
+		return id;
+	}
+	
+	public int getMessageAuthor(int messageID) { 
+		if (messageID < 0 || messageID >= messageList.size()) return 0;
+		Message msg = messageList.get(messageID);
+		if (msg == null) return 0;
+		return msg.getAuthor();
+	}
+	
+	public String getMessageBody(int messageID) {
+		if (messageID < 0 || messageID >= messageList.size()) return null;
+		Message msg = messageList.get(messageID);
+		if (msg == null) return null;
+		return msg.getBody();
+	}
+	
+	public int[] getMessageAuthor(int messageID[]) 
+	{ 
+		int[] result = new int[messageID.length];
+		for (int i=0; i<messageID.length; i++)
+		{
+			result[i] = getMessageAuthor(messageID[i]);
+		}
+		return result;
+	}
 	
 	public String[] getMessageBody(int messageID[])
 	{ 
-		return null;
+		String[] result = new String[messageID.length];
+		for (int i=0; i<messageID.length; i++)
+		{
+			result[i] = getMessageBody(messageID[i]);
+		}
+		return result;
 	}
-	
 }
