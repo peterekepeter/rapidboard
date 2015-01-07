@@ -111,6 +111,7 @@ var CategoryWidget = function(targetElement, navigatorInstance, apiInstance)
 	var generateList = function(array, itemGenerator)
 	{
 		var list = document.createElement('ul');
+		list.setAttribute('class','categoryList');
 		for (var i=0; i<array.length; i++)
 		{
 			list.appendChild(itemGenerator(array[i]));
@@ -121,50 +122,6 @@ var CategoryWidget = function(targetElement, navigatorInstance, apiInstance)
 	var generateCategoryList = function(data)
 	{
 		var list = generateList(data,generateCategoryListItem);
-		
-		if (nav.Count() > 1)
-		{
-			var er = generateDefaultListItem('back');
-			er.setAttribute('class', 'categoryListItem categoryListFunction');
-			er.onclick = function(){ nav.Return(); };
-			list.appendChild(er);
-		}
-		
-		if (data.length<amount)
-		{
-			var en = generateDefaultListItem('new');
-			en.setAttribute('class', 'categoryListItem categoryListFunction');
-			en.onclick = function(){
-				var form = document.createElement("form");
-				form.setAttribute('class', 'categoryCreateForm');
-				var inputname = document.createElement("input");
-				form.appendChild(inputname);
-				form.onsubmit = function(event){
-					var name = form.firstChild.value;
-					if (name.length>0)
-						api.CategoryCreate(name, nav.Current(), 
-							function(data){nav.Enter(data.id)});
-					else 
-						refresh();
-					return false;
-				}
-				this.textContent = null;
-				this.appendChild(form);
-				this.onclick=null;
-				this.setAttribute('class', 'categoryListItemCreate'); 			
-		};
-		list.appendChild(en);
-		}
-		else
-		{
-			var em = generateDefaultListItem('more');
-			em.setAttribute('class', 'categoryListItem categoryListFunction');
-			em.onclick = function(){
-				amount *= 2;
-				refresh();
-			}
-			list.appendChild(em);
-		}
 		return list;
 	}
 	
@@ -175,7 +132,56 @@ var CategoryWidget = function(targetElement, navigatorInstance, apiInstance)
 			//console.log(list);
 			var html = generateCategoryList(list);
 			removeChildren(element);
-			element.appendChild(html);
+			
+			if (html.firstChild != null)
+				element.appendChild(html);
+			
+			if (nav.Count() > 1)
+			{
+				var er = generateDefaultListItem('back');
+				er.setAttribute('class', 'categoryListItem categoryListFunction');
+				er.onclick = function(){ nav.Return(); };
+				element.appendChild(er);
+			}
+			
+			if (list.length<amount)
+			{
+				var en = generateDefaultListItem('new');
+				en.setAttribute('class', 'categoryListItem categoryListFunction');
+				en.onclick = function(){
+					var form = document.createElement("form");
+					form.setAttribute('class', 'categoryCreateForm');
+					var inputname = document.createElement("input");
+					inputname.setAttribute('class', 'categoryCreateInput');
+					inputname.setAttribute('placeholder', 'type here');
+					form.appendChild(inputname);
+					form.onsubmit = function(event){
+						var name = form.firstChild.value;
+						if (name.length>0)
+							api.CategoryCreate(name, nav.Current(), 
+								function(data){nav.Enter(data.id)});
+						else 
+							refresh();
+						return false;
+					}
+					this.textContent = null;
+					this.appendChild(form);
+					this.onclick=null;
+					this.setAttribute('class', 'categoryListItemCreate'); 			
+				};
+				element.appendChild(en);
+			}
+			else
+			{
+				var em = generateDefaultListItem('more');
+				em.setAttribute('class', 'categoryListItem categoryListFunction');
+				em.onclick = function(){
+					amount *= 2;
+					refresh();
+				}
+				element.appendChild(em);
+			}
+			
 		})
 	}
 	
@@ -219,7 +225,7 @@ var BreadCrumbWidget = function(targetElement, navigatorInstance, apiInstance)
 	{
 		var list = nav.AsList();
 		api.CategoryNames(list, function(data){
-			var ul = document.createElement('div');
+			var ul = document.createElement('span');
 			ul.setAttribute('class','bread');
 			
 			heading = document.createElement('h1');

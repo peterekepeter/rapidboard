@@ -15,9 +15,11 @@ function init()
 	var headElement = document.createElement('div'); //heading + breadcrumbs
 	headElement.setAttribute('class','head');
 	mainElement.appendChild(headElement);	
-	var catElement = document.createElement('div'); //category listing
+	var breadElement = document.createElement('span');
+	headElement.appendChild(breadElement);
+	var catElement = document.createElement('span'); //category listing
 	catElement.setAttribute('class','cat');
-	mainElement.appendChild(catElement);
+	headElement.appendChild(catElement);
 	var contentElement = document.createElement('div'); //content
 	contentElement.setAttribute('class','content');
 	contentElement.textContent = "page content comes here";
@@ -26,7 +28,7 @@ function init()
 	//client side control
 	api = Rapidboard();
 	nav = Navigator();
-	wb = BreadCrumbWidget(headElement, nav, api);
+	wb = BreadCrumbWidget(breadElement, nav, api);
 	wc = CategoryWidget(catElement, nav, api);
 	nav.AddListener(wb.Refresh);
 	nav.AddListener(wc.Refresh);

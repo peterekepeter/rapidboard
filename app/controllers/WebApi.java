@@ -70,11 +70,37 @@ public class WebApi extends Controller {
 		int[] list = api.getThreadList(id, start, end);
 		ObjectNode result = Json.newObject();
 		ArrayNode array = result.putArray("list");
+		if (list != null)
 		for (int item : list)
 		{
 			array.add(item);
 		}
 		return ok(result);
 	}
+	
+	public static Result getThreadName(int id)
+	{
+		return ok(api.getThreadName(id));
+	}
 
+
+	public static Result getThreadNames()
+	{
+		JsonNode json = request().body().asJson();
+		JsonNode list = json.get("list");
+		
+		ObjectNode resultJson = Json.newObject();
+		ArrayNode resultList = resultJson.putArray("list");
+		
+		for (JsonNode element : list)
+		{
+			resultList.add(api.getThreadName(element.asInt()));
+		}
+		
+		//System.out.println("request = " + json);
+		//System.out.println("response = " + resultJson);
+		
+		return ok(resultJson);
+	}
+	
 }

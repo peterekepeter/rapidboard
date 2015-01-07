@@ -27,6 +27,7 @@ public class RapidBoard implements RapidBoardAPI
 		messageList.add(null); 
 		
 		/* dummy data for testing */
+		System.out.println("creating dummy data");
 		int news = createCategory("news",0);
 		createCategory("cars",0);
 		int computers = createCategory("computers",0);
@@ -55,6 +56,7 @@ public class RapidBoard implements RapidBoardAPI
 		if (parent == null) return 0;
 		//OK
 		Category newcat = new Category(id, Name, parent);
+		System.out.println("creating category "+Name+" id "+id+" parent " + parentID); 
 		synchronized(categoryList)
 		{
 			categoryList.add(newcat);
@@ -124,26 +126,31 @@ public class RapidBoard implements RapidBoardAPI
 	
 	public int createThread(int categoryID, String name) { 
 		int id = threadList.size();
-		if (categoryID >= id) return 0;
+		if (categoryID >= categoryList.size()) { return 0; };
 		Category cat = categoryList.get(categoryID);
-		if (cat == null) return 0;
+		if (cat == null) { return 0; }
 		//ok
 		Thread t = new Thread(id,name,cat);
 		cat.addThread(t);
 		threadList.add(t);
+		System.out.println("created thread "+name+" id "+id+" cat "+categoryID);
 		return id;
 	}
 	
 	public int[] getThreadList(int categoryID, int start, int end)
 	{
+		
+		System.out.println("id "+categoryID +" start "+start+" end " + end);
 		if (start<end && categoryID >= categoryList.size()) return null;
 		Category cat = categoryList.get(categoryID);
-		//ok i guess
 		int threadCount = cat.getThreadCount();
+		System.out.println(" thread count " + threadCount);
 		if (start<0) start = 0;
 		if (end>threadCount) end = threadCount;
 		int count = end-start;
-		if (count<=0) return null;
+		System.out.println(" count " + count);
+		if (count <= 0) return null;
+		//ok
 		int[] result = new int[count];
 		for (int i=0; i<count; i++)
 		{

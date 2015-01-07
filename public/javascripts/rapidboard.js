@@ -63,8 +63,24 @@ var Rapidboard = (function(){
 		}
 	}
 	
+	var getThreadList = function( id, start, end, callback )
+	{
+		$.get('/api/thread/list?id='+id+'&start='+start+'&end='+end, callback);
+	}
+	
+	var getThreadNames = function ( idlist, callback)
+	{
+		var request = [];
+		for (var i=0; i<idlist.length; i++)
+			if (db.threadName[idlist[i]] == null)
+				request.push(idlist[i]);
+				
+		
+	}
+	
 	var db = {
-		catName : {}
+		catName : [],
+		threadName : []
 	}
 	
 	var strcmp = function(a,b)
@@ -132,6 +148,11 @@ var Rapidboard = (function(){
 				db.catName[data.id] = name;	
 				callback(data);
 			})
+		},
+		
+		ThreadList: function(categoryId, start, end, callback)
+		{
+			
 		}
 	}
 	
