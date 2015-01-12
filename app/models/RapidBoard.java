@@ -38,7 +38,7 @@ public class RapidBoard implements RapidBoardAPI
 		int th1 = createThread(computers, "Apple vs PC");
 		int t1a1 = allocateAuthor(th1);
 		int t1a2 = allocateAuthor(th1);
-		createMessage(th1,t1a1,"I think Apple is better.");
+		createMessage(th1,t1a1,"I think Apple is better. Basically I want a line like the ones that separate posts on stackoverflow, only I want it vertical and to be a kind of \"left border\" that will be in a separate div to display links and content. So instead of making a big rectangle on the left side with links and text, I just want like a really thin, subtle gray line that goes all the way down the page.");
 		createMessage(th1,t1a2,"Apple is an overprices piece of s***");
 		int th2 = createThread(computers, "Photoshop thread");
 		int t2a1 = allocateAuthor(th2);

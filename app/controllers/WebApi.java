@@ -78,23 +78,30 @@ public class WebApi extends Controller {
 		return ok(result);
 	}
 	
-	public static Result getThreadName(int id)
+	public static Result getThread(int id)
 	{
-		return ok(api.getThreadName(id));
+		ObjectNode item = Json.newObject();
+		item.put("name", api.getThreadName(id));
+		item.put("firstMessage", api.getThreadFirstMessageBody(id));
+		return ok(item);
 	}
 
 
-	public static Result getThreadNames()
+	public static Result getThreads()
 	{
 		JsonNode json = request().body().asJson();
 		JsonNode list = json.get("list");
 		
 		ObjectNode resultJson = Json.newObject();
-		ArrayNode resultList = resultJson.putArray("list");
+		ArrayNode array = resultJson.putArray("list");
 		
 		for (JsonNode element : list)
 		{
-			resultList.add(api.getThreadName(element.asInt()));
+			int id = element.asInt();
+			ObjectNode item = Json.newObject();
+			item.put("name", api.getThreadName(id));
+			item.put("firstMessage", api.getThreadFirstMessageBody(id));
+			array.add(item);
 		}
 		
 		//System.out.println("request = " + json);

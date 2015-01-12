@@ -68,19 +68,44 @@ var Rapidboard = (function(){
 		$.get('/api/thread/list?id='+id+'&start='+start+'&end='+end, callback);
 	}
 	
-	var getThreadNames = function ( idlist, callback)
+	var getThreadResult = function( idlist )
+	{
+		var result = [];
+		for(var i=0; i<idlist.length; i++)
+		{
+			result.push(db.thread[idlist[i]]);
+		}
+		return result;
+	}
+
+	var getThread = function ( idlist, callback )
 	{
 		var request = [];
 		for (var i=0; i<idlist.length; i++)
-			if (db.threadName[idlist[i]] == null)
+			if (db.thread[idlist[i]] == null)
 				request.push(idlist[i]);
-				
-		
+
+		if (request.length > 0)
+		{
+			sendJson('/api/thread',{list:request}, function(data){
+				console.log('updating local cache',data)
+				var list = data.list;
+				for (var i=0; i<list.length; i++)
+				{
+					db.thread[request[i]] = list[i];
+				}
+				callback(getThreadResult(idlist));
+			});
+		}
+		else
+		{
+			callback(getThreadResult(idlist));
+		}
 	}
 	
 	var db = {
 		catName : [],
-		threadName : []
+		thread : []
 	}
 	
 	var strcmp = function(a,b)
@@ -152,8 +177,9 @@ var Rapidboard = (function(){
 		
 		ThreadList: function(categoryId, start, end, callback)
 		{
-			
+			getThreadList(categoryId, start, end, function(data){getThread(data.list, callback)});
 		}
+
 	}
 	
 });

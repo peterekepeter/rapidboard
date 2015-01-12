@@ -9,8 +9,8 @@ GET		/api/category/name	controllers.WebApi.getCategoryName(id: Int ?= 0)
 POST	/api/category/name	controllers.WebApi.getCategoryNames()
 POST	/api/category/create	controllers.WebApi.createCategory()
 GET		/api/thread/list	controllers.WebApi.getThreadList(id: Int ?= 0,start: Int ?=0, end: Int ?=10)
-GET		/api/thread/name	controllers.WebApi.getThreadName(id: Int)
-POST	/api/thread/name	controllers.WebApi.getThreadNames()
+GET		/api/thread	controllers.WebApi.getThread(id: Int)
+POST	/api/thread	controllers.WebApi.getThreads()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
