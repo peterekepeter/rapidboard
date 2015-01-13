@@ -27,24 +27,22 @@ public class RapidBoard implements RapidBoardAPI
 		messageList.add(null); 
 		
 		/* dummy data for testing */
-		System.out.println("creating dummy data");
-		int news = createCategory("news",0);
-		createCategory("cars",0);
-		int computers = createCategory("computers",0);
-		createCategory("political", news);
-		createCategory("local", news);
-		createCategory("global", news);
-		createCategory("it", news);
-		int th1 = createThread(computers, "Apple vs PC");
-		int t1a1 = allocateAuthor(th1);
-		int t1a2 = allocateAuthor(th1);
-		createMessage(th1,t1a1,"I think Apple is better. Basically I want a line like the ones that separate posts on stackoverflow, only I want it vertical and to be a kind of \"left border\" that will be in a separate div to display links and content. So instead of making a big rectangle on the left side with links and text, I just want like a really thin, subtle gray line that goes all the way down the page.");
-		createMessage(th1,t1a2,"Apple is an overprices piece of s***");
-		int th2 = createThread(computers, "Photoshop thread");
-		int t2a1 = allocateAuthor(th2);
-		createMessage(th2,t2a1,"Post tips and tricks in photoshop");
-		createMessage(th2,t2a1,"Post tips and tricks in photoshop");
-		createMessage(th2,t2a1,"Double post... sorry...");
+		int th = createThread(0, "Bug Reports!");
+		int op;
+		createMessage(th,allocateAuthor(th),"Post bug reports here!");
+		th = createThread(0, "Feature Requests");
+		createMessage(th,allocateAuthor(th),"Put your feature requests here!");
+		th = createThread(0, "RapidBoard was Lauched!");
+		createMessage(th,op = allocateAuthor(th),"Good news everyone! RapidBoard was lauched!.\nIt's a beautiful place where data can get deleted at any moment!");
+		createMessage(th,op,"https://www.youtube.com/watch?v=xB_nKpEkILs");
+		createMessage(th,op,"Testing URLs http://z0r.de/4789");
+		
+		createCategory("random",0);
+		createCategory("interests",0);
+		createCategory("creative",0);
+		createCategory("political",0);
+		createCategory("filesharing",0);
+		
 		
 	}
 
@@ -56,7 +54,6 @@ public class RapidBoard implements RapidBoardAPI
 		if (parent == null) return 0;
 		//OK
 		Category newcat = new Category(id, Name, parent);
-		System.out.println("creating category "+Name+" id "+id+" parent " + parentID); 
 		synchronized(categoryList)
 		{
 			categoryList.add(newcat);
@@ -138,16 +135,12 @@ public class RapidBoard implements RapidBoardAPI
 	
 	public int[] getThreadList(int categoryID, int start, int end)
 	{
-		
-		System.out.println("id "+categoryID +" start "+start+" end " + end);
 		if (start<end && categoryID >= categoryList.size()) return null;
 		Category cat = categoryList.get(categoryID);
 		int threadCount = cat.getThreadCount();
-		System.out.println(" thread count " + threadCount);
 		if (start<0) start = 0;
 		if (end>threadCount) end = threadCount;
 		int count = end-start;
-		System.out.println(" count " + count);
 		if (count <= 0) return null;
 		//ok
 		int[] result = new int[count];
@@ -266,7 +259,6 @@ public class RapidBoard implements RapidBoardAPI
 		if (t == null) return 0;
 		//ok
 
-		System.out.println("creating message "+body+" author "+author+" id "+id+" parent " + threadID); 
 		Message m = new Message(id,author,body);
 		t.addMessage(m);
 		messageList.add(m);

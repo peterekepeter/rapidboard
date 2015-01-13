@@ -144,9 +144,7 @@ var CategoryWidget = function(targetElement, navigatorInstance, apiInstance, lis
 			removeChildren(element);
 			return;
 		}
-		//console.log(nav,current);
 		api.CategoryList(current,amount,function(list){
-			//console.log(list);
 			var html = generateCategoryList(list);
 			removeChildren(element);
 				
@@ -296,9 +294,12 @@ var ContentViewer = function(targetElement, apiInstance){
 	var generateThreadItem = function(item) 
 	{
 		var div = document.createElement('div');
+
 		div.setAttribute('class', 'threadItem');
 		div.setAttribute('id',item.id);
 		var h2 = document.createElement('h2');
+		var color = 'hsl('+(hash(1+item.id*3.1417)*360)+',50%,50%)';
+		h2.style.background = color;
 		h2.textContent = item.name;
 		div.appendChild(h2);
 		var p = document.createElement('p');
@@ -314,15 +315,93 @@ var ContentViewer = function(targetElement, apiInstance){
 			removeChildren(element);
 			for (var i=0; i<list.length; i++)
 			{
-				element.appendChild(generateThreadItem(list[i]));
+				var item = generateThreadItem(list[i]);
+				element.appendChild(item);
 			}
 			document.body.onresize();
 		});
 	};
 
+	var messageBodyToHtml = function(message)
+	{
+		return message.replace(/</g,'&lt;')
+		              .replace(/>/g,'&gt;')
+		              .replace(/\n/g,'</br> ')
+		              .replace(/\b(\w+:\/\/[^\s]*\.(bmp|png|jpg|jpeg|img|gif))\b/g, '<img src="$1"></img>' )
+		              .replace(/\b(\w+:\/\/[^\s]*\.(webm|mov|avi|mp4))\b/g, '<video controls src="$1"></video>' )
+		              .replace(/\b(\w+:\/\/[^\s]*\.(ogg|wav|mid|mp3))\b/g, '<audio controls src="$1"></audio>' )
+		              .replace(/\b\w+:\/\/[^\s]*[?&]v=([^?&]*)\b/g, '<iframe width="560" height="315" src="//www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>')
+		              .replace(/\b(\w+:\/\/[^\s]*)\b/g, '<a target="_blank" href="$1">$1</a>')
+		              .replace(/\b(magnet:\?[^\s]*)\b/g, '<a href="$1" rel="nofollow">$1</a>')
+		              
+	}
+
+	var letterList = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','X','Y','Z'];
+
+	var hash = function(x)
+	{
+		var v = Math.sin(x*953.1245)*5312.1242;
+		return v-Math.floor(v);
+	}
+
+	var generateAuthorElement = function(id, tid)
+	{
+		var author = document.createElement('div');
+		author.setAttribute('class','messageAuthor');
+		var text = '?';
+		if (id>0) {
+			var color = 'hsl('+(hash(id+tid*3.1417)*360)+',50%,50%)';
+			author.style.background = color;
+			id -= 1;
+			text = "";
+			do {
+				var div = Math.floor( id/letterList.length );
+				var rem = id % letterList.length;
+				text = letterList[rem] + text;
+				id = div;
+			}
+			while (id>0)
+		}
+		author.textContent = text;
+		return author;
+	}
+
+	var generateMessageItem = function(item, tid)
+	{
+		if (item == null)
+			item = { author:0, body:'???', id:0 };
+		var div = document.createElement('div');
+		div.setAttribute('class','messageItem');
+		div.setAttribute('id', item.id);
+		var author = generateAuthorElement(item.author,tid);
+		div.appendChild(author);
+		var body = document.createElement('div');
+		body.innerHTML = messageBodyToHtml(item.body);
+		body.setAttribute('class','messageBody');
+		div.appendChild(body)
+
+		return div;
+	}
+
 	var refreshThread = function (id)
 	{
-		removeChildren(element);
+		api.MessageList(id, function(data)
+		{
+			var messageList = document.createElement('div');
+			console.log(data);
+			for (var i=0; i<data.length; i++)
+			{
+				messageList.appendChild(generateMessageItem(data[i],id));
+			}
+			removeChildren(element);
+			element.appendChild(messageList);
+
+			var editor = document.createElement('div');
+			element.appendChild(editor);
+			MessageCreator(editor, id, api, refresh);
+
+			document.body.onresize();
+		});
 	};
 
 	var viewCategory = function (id) 
@@ -358,6 +437,38 @@ var ContentViewer = function(targetElement, apiInstance){
 		ViewThread : function (id) { viewThread(id); }
 
 	};
+}
+
+var MessageCreator = function(targetElement, threadId, apiInstance, createdCallback)
+{
+	var element = targetElement;
+	var thread = threadId;
+	var api = apiInstance;
+	var callback = createdCallback;
+
+	var div = document.createElement('div');
+	div.setAttribute('class','messageItem');
+	var body = document.createElement('div');
+	body.setAttribute('class','messageBody');
+	var textarea = document.createElement('textarea')
+	body.appendChild(textarea);
+	var buttonSubmit = document.createElement('button')	
+	buttonSubmit.textContent = 'submit';
+	body.appendChild(buttonSubmit);
+	var author = document.createElement('div');
+	author.textContent = '>';
+	author.setAttribute('class','messageAuthor');
+	div.appendChild(author);
+	div.appendChild(body);
+	element.appendChild(div);
+
+	buttonSubmit.onclick = function(){
+		if (textarea.value.trim().length == 0) return;
+		api.	MessageCreate(thread, textarea.value, createdCallback);
+	};
+
+	var w = $(body).innerWidth()*.8-$(buttonSubmit).outerWidth()-20;
+	if (w>200) $(textarea).outerWidth(w);
 }
 
 var ThreadCreator = function(targetElement, categoryId, apiInstance, createdCallback)

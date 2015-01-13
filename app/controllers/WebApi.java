@@ -167,22 +167,63 @@ public class WebApi extends Controller {
 
 	public static Result getMessageCount(int id)
 	{
-		return ok();
+		ObjectNode resultJson = Json.newObject();
+		resultJson.put("messageCount", api.getThreadMessageCount(id,false));
+		return ok(resultJson);
 	}
 
 	public static Result getMessage(int id)
 	{
-		return ok();
+		ObjectNode resultJson = Json.newObject();
+		resultJson.put("author", api.getMessageAuthor(id));
+		resultJson.put("body", api.getMessageBody(id));
+		resultJson.put("id", id);
+		return ok(resultJson);
 	}
 
 	public static Result getMessages()
 	{
-		return ok();
+		JsonNode json = request().body().asJson();
+		JsonNode list = json.get("list");
+		
+		ObjectNode resultJson = Json.newObject();
+		ArrayNode array = resultJson.putArray("list");
+		
+		for (JsonNode element : list)
+		{
+			int id = element.asInt();
+			ObjectNode item = Json.newObject();
+			item.put("author", api.getMessageAuthor(id));
+			item.put("body", api.getMessageBody(id));
+			item.put("id", id);
+			array.add(item);
+		}
+
+		System.out.println("response to getMessages "+resultJson);
+
+		return ok(resultJson);
 	}
 
 	public static Result createMessage()
 	{
-		return ok();
+		JsonNode json = request().body().asJson();
+
+		int thread = json.get("thread").asInt();
+		String body = json.get("message").asText();
+
+		int author = sessionAuthor(thread);
+		if (author == 0)
+		{
+			author = api.allocateAuthor(thread);
+			sessionAuthor(thread, author);
+		}
+
+		int message = api.createMessage(thread,author,body);
+
+		ObjectNode resultJson = Json.newObject();
+		resultJson.put("message", message);
+
+		return ok(resultJson);
 	}
 
 

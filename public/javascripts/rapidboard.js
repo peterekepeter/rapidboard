@@ -88,7 +88,6 @@ var Rapidboard = (function(){
 		if (request.length > 0)
 		{
 			sendJson('/api/thread',{list:request}, function(data){
-				console.log('updating local cache',data)
 				var list = data.list;
 				for (var i=0; i<list.length; i++)
 				{
@@ -103,10 +102,51 @@ var Rapidboard = (function(){
 			callback(getThreadResult(idlist));
 		}
 	}
+
+	var getMessageList = function( id, callback )
+	{
+		$.get('/api/message/list?id='+id, callback);
+	}
+	
+	var getMessageResult = function( idlist )
+	{
+		var result = [];
+		for(var i=0; i<idlist.length; i++)
+		{
+			result.push(db.message[idlist[i]]);
+		}
+		return result;
+	}
+
+	var getMessage = function ( idlist, callback )
+	{
+		var request = [];
+		for (var i=0; i<idlist.length; i++)
+			if (db.message[idlist[i]] == null)
+				request.push(idlist[i]);
+
+		if (request.length > 0)
+		{
+			sendJson('/api/message',{list:request}, function(data){
+				var list = data.list;
+				for (var i=0; i<list.length; i++)
+				{
+					db.message[request[i]] = list[i];
+					db.message[request[i]].id = request[i];
+				}
+				callback(getMessageResult(idlist));
+			});
+		}
+		else
+		{
+			callback(getMessageResult(idlist));
+		}
+	}
 	
 	var db = {
 		catName : [],
-		thread : []
+		thread : [],
+		message : []
 	}
 	
 	var strcmp = function(a,b)
@@ -192,9 +232,36 @@ var Rapidboard = (function(){
 				}
 				else
 				{
-					alert('Information: Failed to create your thread!');
+					alert('API: Failed to create your thread!');
 				}
 			});
+		},
+
+		ThreadInfo: function(threadId, callback)
+		{
+			getThread([threadId], function(data){
+				var thread = data[0];
+				callback(thread);
+			})
+		},
+
+		MessageList: function(threadId, callback)
+		{
+			getMessageList(threadId, function(data){getMessage(data.list, callback)});
+		},
+
+		MessageCreate: function(threadId, message, callback)
+		{
+			sendJson('/api/message/create', {thread:threadId, message:message}, function(data){
+				if (data.message != 0)
+				{
+					callback(data);
+				}
+				else
+				{
+					alert('API: Failed to create your message.')
+				}
+			})
 		}
 
 	}
