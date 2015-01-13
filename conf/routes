@@ -11,6 +11,12 @@ POST	/api/category/create	controllers.WebApi.createCategory()
 GET		/api/thread/list	controllers.WebApi.getThreadList(id: Int ?= 0,start: Int ?=0, end: Int ?=10)
 GET		/api/thread	controllers.WebApi.getThread(id: Int)
 POST	/api/thread	controllers.WebApi.getThreads()
+POST    /api/thread/create 	controllers.WebApi.createThread()
+GET 	/api/message/list 	controllers.WebApi.getMessageList(id: Int)
+GET     /api/message/count  controllers.WebApi.getMessageCount(id: Int)
+GET     /api/message        controllers.WebApi.getMessage(id: Int)
+POST    /api/message        controllers.WebApi.getMessages()
+POST    /api/message/create controllers.WebApi.createMessage()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

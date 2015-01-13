@@ -54,8 +54,7 @@ var Navigator = function(rootlocation, listenerList)
 				stack.pop();
 				i--;
 			}
-			if (loc != stack[stack.length - 1])
-				locationChanged();
+			locationChanged();
 		},
 		Current:function(offset){
 			if (offset == null) offset = 0;
@@ -85,7 +84,7 @@ var Navigator = function(rootlocation, listenerList)
 /// This object facilitates category navigation using html.
 /// It uses a navigator object and the rapidboard api.
 ///
-var CategoryWidget = function(targetElement, navigatorInstance, apiInstance, listTitle, listLevel)
+var CategoryWidget = function(targetElement, navigatorInstance, apiInstance, listTitle, listLevel, threadCreateCallback)
 {
 	var nav = navigatorInstance;
 	var api = apiInstance;
@@ -170,9 +169,17 @@ var CategoryWidget = function(targetElement, navigatorInstance, apiInstance, lis
 				element.appendChild(er);
 			}
 			
-			if (listLevel == null)
+			if (listLevel == null && threadCreateCallback != null)
 			{
-				if (list.length<amount)
+				var ed = generateDefaultListItem('new thread');
+				ed.setAttribute('class', 'categoryListItem categoryListFunction');
+				ed.onclick = threadCreateCallback;
+				element.appendChild(ed);
+			}
+			
+			if (list.length<amount)
+			{
+				if (listLevel == null) //only display if showing subcategories
 				{
 					var en = generateDefaultListItem('new category');
 					en.setAttribute('class', 'categoryListItem categoryListFunction');
@@ -199,16 +206,16 @@ var CategoryWidget = function(targetElement, navigatorInstance, apiInstance, lis
 					};
 					element.appendChild(en);
 				}
-				else
-				{
-					var em = generateDefaultListItem('show more');
-					em.setAttribute('class', 'categoryListItem categoryListFunction');
-					em.onclick = function(){
-						amount *= 2;
-						refresh();
-					}
-					element.appendChild(em);
+			}
+			else
+			{
+				var em = generateDefaultListItem('show more');
+				em.setAttribute('class', 'categoryListItem categoryListFunction');
+				em.onclick = function(){
+					amount *= 2;
+					refresh();
 				}
+				element.appendChild(em);
 			}
 			
 		})
@@ -279,37 +286,146 @@ var BreadCrumbWidget = function(targetElement, navigatorInstance, apiInstance)
 	}
 }
 
-var ContentViewer = function(targetElement, navigatorInstance, apiInstance){
+var ContentViewer = function(targetElement, apiInstance){
 	var element = targetElement;
-	var nav = navigatorInstance;
 	var api = apiInstance;
+	var viewingCategory = true;
+	var categoryId = nav.Current();
+	var threadId = 0;
 
-	var generateItem = function(item) 
+	var generateThreadItem = function(item) 
 	{
 		var div = document.createElement('div');
 		div.setAttribute('class', 'threadItem');
+		div.setAttribute('id',item.id);
 		var h2 = document.createElement('h2');
 		h2.textContent = item.name;
 		div.appendChild(h2);
 		var p = document.createElement('p');
 		p.textContent = item.firstMessage;
 		div.appendChild(p);
+		div.onclick = function(){viewThread(Number(this.getAttribute('id')))};
 		return div;
+	}
+
+	var refreshCategory = function (id)
+	{
+		api.ThreadList(id,0,100,function(list){
+			removeChildren(element);
+			for (var i=0; i<list.length; i++)
+			{
+				element.appendChild(generateThreadItem(list[i]));
+			}
+			document.body.onresize();
+		});
+	};
+
+	var refreshThread = function (id)
+	{
+		removeChildren(element);
+	};
+
+	var viewCategory = function (id) 
+	{ 
+		viewingCategory = true; 
+		categoryId = id; refresh(); 
+	}
+
+	var viewThread = function (id) 
+	{ 
+		viewingCategory = false; 
+		threadId = id; 
+		refresh(); 
 	}
 
 	var refresh = function()
 	{
-		var x = nav.Current();
-		api.ThreadList(x,0,100,function(list){
-			removeChildren(element);
-			for (var i=0; i<list.length; i++)
-			{
-				element.appendChild(generateItem(list[i]));
-			}
-		});
+		if (viewingCategory)
+		{
+			refreshCategory(categoryId);
+		}
+		else
+		{
+			refreshThread(threadId);
+		}
 	}
 
+	refresh(); //initial render
+
 	return {
-		Refresh : function () { refresh(); }
+		Refresh : function () { refresh(); },
+		ViewCategory : function (id) { viewCategory(id); },
+		ViewThread : function (id) { viewThread(id); }
+
+	};
+}
+
+var ThreadCreator = function(targetElement, categoryId, apiInstance, createdCallback)
+{
+	var element = targetElement;
+	var category = categoryId;
+	var api = apiInstance;
+	var callback = createdCallback;
+
+	var div = document.createElement('div');
+	div.setAttribute('class', 'threadCreator');
+	div.setAttribute('placeholder', 'thread title');
+	var h2 = document.createElement('h2');
+	var input = document.createElement('input');
+	h2.appendChild(input);
+	div.appendChild(h2);
+	var p = document.createElement('p');
+	var textArea = document.createElement('textarea');
+	p.appendChild(textArea);
+	div.appendChild(p);
+	var actions = document.createElement('div');
+
+	var buttonSubmit = document.createElement('button')	
+	buttonSubmit.textContent = 'submit';
+	actions.appendChild(buttonSubmit);
+
+	var buttonCancel = document.createElement('button')	
+	buttonCancel.textContent = 'cancel';
+	actions.appendChild(buttonCancel);
+
+	var error = document.createElement('span');
+	error.setAttribute('class','error');
+	div.appendChild(error);
+
+	div.appendChild(actions);
+
+	buttonCancel.onclick = function()
+	{
+		element.removeChild(div);
+	}
+
+	buttonSubmit.onclick = function()
+	{
+		if (input.value.trim().length == 0)
+		{
+			error.textContent = 'Title is too short!'
+		}
+		else if (textArea.value.trim().length == 0)
+		{
+			error.textContent = 'Message is too short!'
+		}
+		else
+		{
+			element.removeChild(div);
+			api.ThreadCreate(category, input.value, textArea.value, callback);
+		}
+	}
+
+	
+	if (element.children.length > 0)
+		element.insertBefore(div,element.firstChild)
+	else 
+		element.appendChild(div);
+
+	$(input).outerWidth($(h2).innerWidth()-10);
+	$(textArea).outerWidth($(p).innerWidth()-10);
+
+	return {
+
 	};
 }

@@ -2,13 +2,14 @@
 package models;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 class Category
 {
 	private int id;
 	private String name;
 	private ArrayList<Category> children;
-	private ArrayList<Thread> threads;
+	private LinkedList<Thread> threads;
 	private Category parent;
 	
 	public Category(int id, String name, Category parent)
@@ -17,7 +18,7 @@ class Category
 		this.name = name;
 		this.parent = parent;
 		children = new ArrayList<Category>();
-		threads = new ArrayList<Thread>();
+		threads = new LinkedList<Thread>();
 	}
 	public void addChild(Category category)
 	{
@@ -55,7 +56,7 @@ class Category
 	}
 	public void addThread(Thread t)
 	{
-		threads.add(t);
+		threads.addFirst(t);
 	}
 	public void removeThread(Thread t)
 	{

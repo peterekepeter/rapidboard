@@ -83,6 +83,8 @@ public class WebApi extends Controller {
 		ObjectNode item = Json.newObject();
 		item.put("name", api.getThreadName(id));
 		item.put("firstMessage", api.getThreadFirstMessageBody(id));
+		item.put("firstMessage", api.getThreadFirstMessageBody(id));
+		item.put("messageCount", api.getThreadMessageCount(id, false));
 		return ok(item);
 	}
 
@@ -101,6 +103,7 @@ public class WebApi extends Controller {
 			ObjectNode item = Json.newObject();
 			item.put("name", api.getThreadName(id));
 			item.put("firstMessage", api.getThreadFirstMessageBody(id));
+			item.put("messageCount", api.getThreadMessageCount(id, false));
 			array.add(item);
 		}
 		
@@ -109,5 +112,78 @@ public class WebApi extends Controller {
 		
 		return ok(resultJson);
 	}
+
+	private static void sessionAuthor(int t, int a)
+	{
+		session("t"+t,Integer.toString(a));
+	}
+
+	private static int sessionAuthor(int t)
+	{
+		String val = session("t"+t);
+		if (val == null) return 0;
+		return Integer.parseInt(val);
+	}
+
+	public static Result createThread()
+	{
+		JsonNode json = request().body().asJson();
+
+		int category = json.get("category").asInt();
+		String name = json.get("name").asText();
+		String message = json.get("message").asText(); 
+
+		if (name.trim().length() == 0 || message.trim().length() == 0)
+		{
+			ObjectNode resultJson = Json.newObject();
+			resultJson.put("thread", 0);
+			return ok(resultJson);
+		}
+
+		int tid = api.createThread(category, name);
+		int aid = api.allocateAuthor(tid);
+		api.createMessage(tid,aid,message);
+
+		ObjectNode resultJson = Json.newObject();
+		resultJson.put("thread", tid);
+
+		sessionAuthor(tid, aid);
+
+		return ok(resultJson);
+	}
 	
+	public static Result getMessageList(int id)
+	{
+		int[] list = api.getThreadMessageList(id);
+		ObjectNode result = Json.newObject();
+		ArrayNode array = result.putArray("list");
+		if (list != null)
+		for (int item : list)
+		{
+			array.add(item);
+		}
+		return ok(result);
+	}
+
+	public static Result getMessageCount(int id)
+	{
+		return ok();
+	}
+
+	public static Result getMessage(int id)
+	{
+		return ok();
+	}
+
+	public static Result getMessages()
+	{
+		return ok();
+	}
+
+	public static Result createMessage()
+	{
+		return ok();
+	}
+
+
 }

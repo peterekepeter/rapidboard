@@ -133,7 +133,6 @@ public class RapidBoard implements RapidBoardAPI
 		Thread t = new Thread(id,name,cat);
 		cat.addThread(t);
 		threadList.add(t);
-		System.out.println("created thread "+name+" id "+id+" cat "+categoryID);
 		return id;
 	}
 	
@@ -266,8 +265,11 @@ public class RapidBoard implements RapidBoardAPI
 		Thread t = threadList.get(threadID);
 		if (t == null) return 0;
 		//ok
+
+		System.out.println("creating message "+body+" author "+author+" id "+id+" parent " + threadID); 
 		Message m = new Message(id,author,body);
 		t.addMessage(m);
+		messageList.add(m);
 		return id;
 	}
 	

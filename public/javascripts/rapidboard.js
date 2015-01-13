@@ -93,6 +93,7 @@ var Rapidboard = (function(){
 				for (var i=0; i<list.length; i++)
 				{
 					db.thread[request[i]] = list[i];
+					db.thread[request[i]].id = request[i];
 				}
 				callback(getThreadResult(idlist));
 			});
@@ -162,6 +163,7 @@ var Rapidboard = (function(){
 			});
 		},
 		
+		/// Get a list of category names
 		CategoryNames: function(namelist, callback)
 		{
 			getCatNames(namelist,callback); 
@@ -178,6 +180,21 @@ var Rapidboard = (function(){
 		ThreadList: function(categoryId, start, end, callback)
 		{
 			getThreadList(categoryId, start, end, function(data){getThread(data.list, callback)});
+		},
+
+		ThreadCreate: function(categoryId, threadTitle, firstMessage, callback)
+		{
+			sendJson('/api/thread/create', {category:categoryId, name:threadTitle, message:firstMessage}, function(data){
+				if (data.thread!=0) 
+				{
+					db.thread[data.thread] = {name:threadTitle, firstMessage:firstMessage, messageCount:1, id:data.thread};
+					callback(data);
+				}
+				else
+				{
+					alert('Information: Failed to create your thread!');
+				}
+			});
 		}
 
 	}

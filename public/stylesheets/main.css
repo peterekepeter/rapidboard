@@ -15,7 +15,7 @@ div{
 	
 }
 
-input { border:1px solid #ccc; }
+input, textarea { border:1px solid #ccc; }
 
 ul{
 	display:inline;
@@ -41,10 +41,6 @@ h1{
 	opacity:.5;
 }
 
-.categoryListFunction{
-	color:#fff;
-	opacity:.6;
-}
 
 .categoryListItemCreate{
 	display:inline;
@@ -71,6 +67,11 @@ h1{
 	cursor:pointer;
 }
 
+.categoryListFunction{
+	color:#fff;
+	opacity:.6;
+}
+
 .breadItem:hover{
 	opacity:.5;
 }
@@ -89,7 +90,7 @@ h1{
 	color:rgba(255,255,255,.25);
 	padding:10px;
 	padding-top:0px;
-	width: 200px;
+	width: 180px;
 	float: left;
 	overflow: hidden;
 }
@@ -103,13 +104,12 @@ h1{
 }
 
 .content{
-	padding:10px;
 	float: left;
 	overflow: hidden;
 }
 
 .threadItem{
-	height:44px;
+	height:43px;
 	background: #fff;
 	color: #000;
 	padding:2px;
@@ -119,6 +119,7 @@ h1{
 
 .threadItem h2{
 	color:#222;
+	padding:5px;
 	padding-left: 10px;
 	padding-right: 10px;
 	display: inline;
@@ -135,4 +136,65 @@ h1{
 .threadItem:hover{
 	opacity: .5;
 	cursor:pointer;
-};
+}
+
+.head span .categoryListFunction{
+	padding-left:15px;
+}
+
+.head span form { display: inline; padding-left:10px; }
+
+.threadCreator{
+}
+
+.threadCreator{
+	padding:5px;
+	background: #fff;
+	color: #000;
+}
+
+.threadCreator input, .threadCreator textarea{
+	font-size: inherit;
+	font-family: inherit;
+	color: inherit;
+	background: inherit;
+}
+
+.threadCreator h2{
+	padding:2px;
+	color:#222;
+}
+
+.threadCreator p{
+	padding:2px;
+	font-size: 14px;
+}
+
+.threadCreator div{
+	padding:2px;
+}
+
+button{
+	background: #ccc;
+	cursor: pointer;
+	padding:1px;
+	font-family: inherit;
+	font-size: 12px;
+	border:1px solid rgba(0,0,0,.25);
+}
+
+button:hover{
+	opacity: .75;
+}
+
+button:active{
+	border-color: rgba(0,0,0,.5);
+}
+
+.threadCreator button{
+	margin-right: 5px;
+}
+
+.error{
+	color:#f34;
+}

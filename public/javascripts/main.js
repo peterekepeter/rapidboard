@@ -32,17 +32,25 @@ function init()
 	//client side control
 	api = Rapidboard();
 	nav = Navigator();
+	cv = ContentViewer(contentElement, api);
 	wb = BreadCrumbWidget(breadElement, nav, api);
-	wc = CategoryWidget(catElement, nav, api, 'sub categories');
-	wc2 = CategoryWidget(catElement2, nav, api, 'more categories', -1);
-	wc3 = CategoryWidget(catElement3, nav, api, 'even more', -2);
-	cv = ContentViewer(contentElement, nav, api);
+	wc2 = CategoryWidget(catElement2, nav, api, 'categories', -1);
+	wc3 = CategoryWidget(catElement3, nav, api, 'more categories', -2);
+
+	wc = CategoryWidget(catElement, nav, api, 'current level',null, function(){
+		ThreadCreator(contentElement, nav.Current(), api, function(){
+			cv.ViewCategory(nav.Current());
+		});
+	});
+
 	nav.AddListener(wb.Refresh);
 	nav.AddListener(wc.Refresh);
 	nav.AddListener(wc2.Refresh);
 	nav.AddListener(wc3.Refresh);
-	nav.AddListener(cv.Refresh);
-	
+	nav.AddListener(function(){
+		cv.ViewCategory(nav.Current());
+	});
+
 	// make it visible
 	document.body.appendChild(headElement);
 	document.body.appendChild(mainElement);
@@ -55,6 +63,7 @@ function init()
 	}
 	document.body.onresize();
 	setTimeout(document.body.onresize, 1000);
+
 }
 
 
